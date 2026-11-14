@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Offer Manager</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#101827;
+  color:white;
+  padding:20px;
+}
+.container{max-width:600px;margin:auto}
+h1{color:#71e59a;text-align:center}
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+  margin:15px 0;
+}
+input,select,button{
+  width:100%;
+  padding:13px;
+  margin:7px 0;
+  border:0;
+  border-radius:8px;
+}
+button{
+  background:#22c55e;
+  color:#06220f;
+  font-weight:bold;
+  cursor:pointer;
+}
+.stats{
+  display:flex;
+  gap:10px;
+}
+.stats .card{flex:1;text-align:center}
+.coin{font-size:25px;color:#facc15}
+.offer{
+  padding:12px;
+  border-bottom:1px solid #475569;
+}
+small{color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚡ Super Offer Manager</h1>
+
+<div class="stats">
+ <div class="card">
+  <small>Total Coins</small>
+  <div class="coin" id="total">0 🪙</div>
+ </div>
+ <div class="card">
+  <small>Completed Offers</small>
+  <h2 id="count">0</h2>
+ </div>
+</div>
+
+<div class="card">
+<h3>➕ Add completed offer</h3>
+<input id="offerName" placeholder="Offer name">
+<input id="coins" type="number" min="1" placeholder="Coins earned">
+<button onclick="addOffer()">Save Offer</button>
+</div>
+
+<div class="card">
+<h3>📊 Your offer history</h3>
+<div id="history"></div>
+<button onclick="clearHistory()">Clear History</button>
+</div>
+</div>
+
+<script>
+let offers = JSON.parse(
+ localStorage.getItem("offers") || "[]"
+);
+
+function save(){
+ localStorage.setItem("offers",JSON.stringify(offers));
+ render();
+}
+
+function addOffer(){
+ const name=document.getElementById("offerName").value.trim();
+ const coins=Number(document.getElementById("coins").value);
+
+ if(!name || !Number.isFinite(coins) || coins<=0){
+  alert("Enter a valid offer and coin amount");
+  return;
+ }
+
+ offers.push({name,coins,date:new Date().toLocaleString()});
+ document.getElementById("offerName").value="";
+ document.getElementById("coins").value="";
+ save();
+}
+
+function render(){
+ let total=offers.reduce((sum,o)=>sum+o.coins,0);
+ document.getElementById("total").textContent=total+" 🪙";
+ document.getElementById("count").textContent=offers.length;
+
+ document.getElementById("history").innerHTML=
+ offers.map(o=>`
+ <div class="offer">
+ <b>${escapeHTML(o.name)}</b>
+ <span style="float:right;color:#facc15">${o.coins} 🪙</span>
+ <br><small>${escapeHTML(o.date)}</small>
+ </div>`).join("") || "No offers recorded yet.";
+}
+
+function escapeHTML(s){
+ return s.replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",
+ '"':"&quot;","'":"&#39;"
+ })[c]);
+}
+
+function clearHistory(){
+ if(confirm("Delete all offer history?")){
+  offers=[];
+  save();
+ }
+}
+
+render();
+</script>
+</body>
+  </html>
